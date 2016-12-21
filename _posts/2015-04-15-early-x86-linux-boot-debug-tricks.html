@@ -1,0 +1,102 @@
+---
+layout: post
+title: Early x86 Linux boot debug tricks
+date: '2015-04-15T12:40:00.002-07:00'
+tags:
+- linux
+- technical
+modified_time: '2015-04-15T12:40:22.988-07:00'
+blogger_id: tag:blogger.com,1999:blog-5657688967837431090.post-2199377070847540335
+blogger_orig_url: http://www.codeblueprint.co.uk/2015/04/early-x86-linux-boot-debug-tricks.html
+---
+
+Trying to diagnose problems in the early asm instructions of the x86 Linux kernel is just about the most cumbersome task you can perform in the kernel. There are still no good methods of debugging very early booting issues. For problems that occur before the serial console and EFI framebuffer are initialized the only solution is to force your machine to reboot or hang at strategic locations in the kernel to try and home in on the root cause.<br /><br />If your machine is misbehaving during boot there are two symptoms that you will want to debug: either the machine unexpectedly hangs, or unexpectedly resets.<br /><br />Below are some tricks that I rely on every time someone comes to me with an early EFI booting problem. I've also used them when writing the <a href="https://lwn.net/Articles/454651/" target="_blank">EFI boot stub</a> and <a href="https://lwn.net/Articles/589193/" target="_blank">EFI mixed mode</a> kernel patches. These techniques are not pretty, but they get the job done when you're out of other options.<br /><h4></h4><div><br /></div><h4>Debugging a mysterious reset with an infinite loop</h4><div>The strategy to employ in this scenario is to force your machine to hang. Debugging this is made slightly easier because you can use one trick for all code paths; hang the machine.</div><div><br />The usual idiom is this,</div>
+<br />
+{% highlight asm %}
+1:
+	hlt
+	jmp 1b
+{% endhighlight %}
+
+which causes the machine to halt if it reaches this instruction. For
+example, assume that there's a bug in the EFI boot stub such that
+<code>hdr.code32_start</code> isn't initialized correctly. The buggy
+code would look like this (modified from the <a
+href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/arch/x86/boot/compressed/head_64.S#n281"
+target="_blank">original</a>),<br /><br />
+{% highlight asm %}
+        call efi_main
+        movq %rax,%rsi
+
+        movl BP_code32_start(%rsi), %eax
+        leaq preferred_addr(%rax), %rax
+        jmp *%rax
+
+preferred_addr:
+{% endhighlight %}
+<br />Assuming we're jumping through an invalid pointer in <code>%rax</code>, executing the <code>jmp</code> instruction will cause a reset. But suppose we didn't know that already. Instead, we'd have to gradually modify the code as we got closer and closer to the root of the issue. The first time it might look like this,<br />
+<br />
+{% highlight asm %}
+        call efi_main
+1:
+        hlt
+        jmp 1b
+
+        movq %rax,%rsi
+
+        movl BP_code32_start(%rsi), %eax
+        leaq preferred_addr(%rax), %rax
+        jmp *%rax
+
+preferred_addr:
+{% endhighlight %}
+And the machine hangs. OK, good. We know everything upto and including
+<code>efi_main()</code> is working fine. We'll quickly realise that a
+modification like this returns us back to the resetting problem, <br
+/><br />
+{% highlight asm %}
+        call efi_main
+        movq %rax,%rsi
+
+        movl BP_code32_start(%rsi), %eax
+        leaq preferred_addr(%rax), %rax
+        jmp *%rax
+
+preferred_addr:
+1:
+        hlt
+        jmp 1b
+{% endhighlight %}
+Bingo. The problem is obviously a bogus <code>%rax</code> value. Of course, things get substantially easier once you get to the C code in <code>x86_64_start_kernel()</code> and can use the old reliable idiom, <br />
+<br />
+{% highlight c %}
+        while (1);
+{% endhighlight %}
+<br /><h4>Debugging a hang by triggering a reset</h4></div><div>There are a few different tricks to attempt when diagnosing a hang in the early kernel code, depending on where you suspect the hang is occurring. All of the tricks cause the machine to reset.</div><div><br /></div><div>If you're debugging a hang before the interrupt handlers have been setup in <code>x86_64_start_kernel()</code>then you can simply do either of,&nbsp;</div><div>
+<br />
+{% highlight asm %}
+        xorq   %rax, %rax
+        jmp    *%rax
+{%endhighlight %}
+
+or you can do something similar from C,</div><div>
+<br />
+{% highlight C %}
+        void (*foobar)(void);
+
+        foobar = NULL;
+        foobar();
+{% endhighlight %}
+Basically, jump through a NULL pointer. However, once you get passed
+<code>x86_64_start_kernel()</code> simply jumping through a NULL
+pointer isn't going to cause the machine to reset; it will trigger the
+page fault interrupt handler. So, you need to load an empty interrupt
+descriptor table (IDT) and then jump through a NULL
+pointer,</div><div><br />
+{% highlight C %}
+        static const struct desc_ptr no_idt = {};
+        void (*foobar)(void) = NULL;
+
+        load_idt(&no_idt);
+        foobar();
+{% endhighlight %}

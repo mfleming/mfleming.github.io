@@ -1,0 +1,30 @@
+---
+layout: post
+title: Using perf-stat as a simple benchmark wrapper
+date: '2016-06-06T02:51:00.000-07:00'
+tags: 
+modified_time: '2016-06-06T02:51:58.440-07:00'
+blogger_id: tag:blogger.com,1999:blog-5657688967837431090.post-7943656172974143534
+blogger_orig_url: http://www.codeblueprint.co.uk/2016/06/using-perf-stat-as-simple-benchmark.html
+---
+
+<p>I'm pretty familiar with most of the options available to the <code>perf-stat</code> command but I've never understood why anyone would want to use the <code>--null</code> option. The help text for this option reads,</p>
+<p><code>    -n, --null            null run - dont start any counters </code></p> <p>Then I came across <a href="https://git.kernel.org/cgit/linux/kernel/git/tip/tip.git/commit/kernel/sched/core.c?h=sched/core&id=3e71a462dd483ce508a723356b293731e7d788ea">this commit</a> to the Linux kernel tree from Peter Zijlstra and it suddenly became clear that <code>--null</code> allows you to use the <b>other</b> features of <code>perf-stat</code>, such as its ability to repeatedly execute a command via <code>--repeat</code>, without the overhead incurred from using performance counters.</p>   <p>In short, you can use <code>perf-stat</code> as a simple benchmark wrapper or harness to execute a program and print runtime statistics.</p> <p>For example, if you've got a micro-benchmark that executes some operations and you care about the time it took to perform those operations (as opposed to the number of operations), you can use <code>perf-stat</code> to run the program a number of times and print the average (arithmetic mean) time it took to run the program along with the <a href="https://en.wikipedia.org/wiki/Coefficient_of_variation">coefficient of variance</a>,</p>
+
+{% highlight bash %}
+# perf stat --null --repeat 5 -- ./hackbench 21 process 1000
+Running with 21*40 (== 840) tasks.
+Time: 0.624
+Running with 21*40 (== 840) tasks.
+Time: 0.552
+Running with 21*40 (== 840) tasks.
+Time: 0.502
+Running with 21*40 (== 840) tasks.
+Time: 0.520
+Running with 21*40 (== 840) tasks.
+Time: 0.498
+
+ Performance counter stats for './hackbench 21 process 1000' (5 runs):
+
+       0.602524721 seconds time elapsed                                          ( +-  4.96% )
+{% endhighlight %}

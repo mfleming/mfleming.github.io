@@ -1,0 +1,12 @@
+---
+layout: post
+title: Linux kernel scheduler load balancer
+date: '2015-12-17T13:45:00.000-08:00'
+author: Matt Fleming
+tags: 
+modified_time: '2015-12-17T13:45:08.441-08:00'
+blogger_id: tag:blogger.com,1999:blog-5657688967837431090.post-6446804488376680244
+blogger_orig_url: http://www.codeblueprint.co.uk/2015/12/linux-kernel-scheduler-load-balancer.html
+---
+
+Over the last few months I've been investigating the real-time load balancer design in the Linux kernel. It began when I saw <a href="https://lkml.kernel.org/r/20151211141028.GH6357@twins.programming.kicks-ass.net">this post</a> from Peter Zijlstra on the Linux kernel mailing list. In it, Peter describes a scenario where 4 SCHED_RR tasks become unevenly distributed between 2 CPUs, with CPU0 having 1 task on its runqueue and CPU1 having 3. This imbalance should be prohibited by the load-balancer if it was working as intended.  <br><br>Speaking to some developers in the Linux real-time community, this is a known shortcoming of the existing scheduler design. <br><br>   <h3>Existing load balancer tests</h3>The current design for RT load-balancing was designed entirely around the rt-migration test from rt-tests.

@@ -1,0 +1,36 @@
+---
+layout: post
+title: Installing debug symbols on openSUSE Tumbleweed
+date: '2015-12-09T03:46:00.001-08:00'
+tags: 
+modified_time: '2015-12-09T03:46:59.156-08:00'
+blogger_id: tag:blogger.com,1999:blog-5657688967837431090.post-1769570737022429301
+blogger_orig_url: http://www.codeblueprint.co.uk/2015/12/installing-debug-symbols-on-opensuse.html
+---
+
+Much to my confusion the openSUSE source repository containing debug symbols is not enabled by default, though the repo metadata is present, 
+<br /> <br />
+{% highlight bash %}
+matt@feynman:~> zypper lr repo-debug
+Alias          : repo-debug                                             
+Name           : openSUSE-Tumbleweed-Debug                              
+URI            : http://download.opensuse.org/debug/tumbleweed/repo/oss/
+Enabled        : No                                   
+GPG Check      : ----                                 
+Priority       : 99                                                     
+Auto-refresh   : On                                                     
+Keep Packages  : Off                                                    
+Type           : yast2                                                  
+GPG Key URI    :                                                        
+Path Prefix    : /                                                      
+Parent Service :                                                        
+Repo Info Path : /etc/zypp/repos.d/repo-debug.repo                      
+MD Cache Path  : /var/cache/zypp/raw/repo-debug                         
+{% endhighlight %}
+
+Which means that, by default, debug packages will not be returned in your zypper search results. You can enable it so that the debug packages are displayed with <code>zypper search</code> like so,
+<br /><br /> 
+{% highlight bash %}
+matt@feynman:~> sudo zypper mr -e repo-debug
+Repository 'repo-debug' has been successfully enabled.
+{% endhighlight %}

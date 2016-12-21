@@ -1,0 +1,12 @@
+---
+layout: post
+title: 'Using the scientific method to analyse performance '
+date: '2016-10-15T01:11:00.001-07:00'
+author: Matt Fleming
+tags: 
+modified_time: '2016-10-15T01:11:31.394-07:00'
+blogger_id: tag:blogger.com,1999:blog-5657688967837431090.post-7170917541793542160
+blogger_orig_url: http://www.codeblueprint.co.uk/2016/10/using-scientific-method-to-analyse.html
+---
+
+When investigating the performance of complex or unfamiliar code the scientific method is the best tool. And that's despite the vast selections of tools available for measure your code. Tool can be misleading and definitely too specific for initial stages of investigations.  In contrast the scientific method applies to any situation and is not limited by your understanding of other tools. Properly applied, it will never lie and is not biased.  The scientific method  You may remember from science class at school that there are Two steps hypothesis, prediction then  investigate  . If the outcome doesn't match your predictions then your hypothesis is wrong.   An example with the Linux scheduler  CPU migrations are often a cause of performance issues with multithreaded applications. A quick way to test whether migrations are having a negative effect (hypothesis) is to either pin the task or use perf stat to count migration she (investigate). If there is no effect the number should not impact the results (prediction).

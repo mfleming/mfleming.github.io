@@ -1,0 +1,44 @@
+---
+layout: post
+title: git pathspec magic
+date: '2015-01-18T12:45:00.001-08:00'
+tags: 
+modified_time: '2015-01-18T12:45:33.827-08:00'
+blogger_id: tag:blogger.com,1999:blog-5657688967837431090.post-5610785252130411852
+blogger_orig_url: http://www.codeblueprint.co.uk/2015/01/git-pathspec-magic.html
+---
+
+I am constantly surprised by the number of features provided by git.
+This week, while trying to figure out how to list the commits
+from&nbsp;the&nbsp;<a href="https://github.com/01org/luv-yocto">Linux
+UEFI Validation project</a>&nbsp;that are not part of the meta-luv
+layer and also not part of upstream Poky, I came across a useful trick
+on <a
+href="http://stackoverflow.com/a/21079437">stackoverflow</a>&nbsp;-<a
+href="https://github.com/git/git/commit/ef79b1f8704668a6cdf4278f9255e03ca785bfb4">
+git pathspec magic</a>.<br /><br />Commits not inside meta-luv and not
+sent to Poky represent the technical debt for the LUV project. Ideally
+the only changes we make outside of the meta-luv layer would also be
+sent upstream. That's not always possible, so at the very least, we
+need a way of finding those changes to track them.<br /><br />The
+trick goes like this... If you want to list all commits apart from
+those relating to a particular subdirectory, use the ":exclude"
+pathspec magic,<br /><br />
+{% highlight bash %}
+  git log -- . ":(exclude)directory"
+{% endhighlight %}
+
+This is superb for the LUV project because most of the project's significant changes are in the meta-luv directory, which is a separate layer hosted on <a href="http://git.yoctoproject.org/">git.yoctoproject.org</a>. What we want to find is those commits that are not part of meta-luv.<br /><br />To recap, the way to display just those commits that are not part of upstream Poky dora release is,<br /><br />
+{% highlight bash %}
+  git log poky/dora..HEAD
+{% endhighlight %}
+
+But the resultant list of commits includes those that are part of the meta-luv layer. We don't want those commits, we just want to see those that are not part of the meta-luv layer and not part of Poky. <br /><br />The trick goes like this, <br /><br />
+
+{% highlight bash %}
+  git log poky/dora..HEAD -- . ":(exclude)meta-luv"
+{% endhighlight %}
+
+Pathspecs can be applied to all git commands that deal with paths, though documentation for git pathspecs isn't actually easy to find. You won't find it as part of the <cite>git-log</cite> man page. The best bet is to take a look at <cite>gitglossary</cite>, 
+<br /><br />
+<pre><br />       pathspec<br />           Pattern used to limit paths in Git commands.<br /> <br />           ...<br /><br />           A pathspec that begins with a colon : has special meaning. In the<br />           short form, the leading colon : is followed by zero or more "magic<br />           signature" letters (which optionally is terminated by another colon<br />           :), and the remainder is the pattern to match against the path.<br /><br />           ...<br /><br />           exclude<br />               After a path matches any non-exclude pathspec, it will be run<br />               through all exclude pathspec (magic signature: !). If it<br />               matches, the path is ignored.<br /></pre>

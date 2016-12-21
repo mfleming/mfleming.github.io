@@ -1,0 +1,43 @@
+---
+layout: post
+title: x86 descriptor table registers and lazy evaluation
+date: '2015-12-23T14:41:00.000-08:00'
+tags:
+- linux
+- technical
+modified_time: '2015-12-23T14:50:32.653-08:00'
+blogger_id: tag:blogger.com,1999:blog-5657688967837431090.post-8908341887238656108
+blogger_orig_url: http://www.codeblueprint.co.uk/2015/12/x86-descriptor-table-registers-and-lazy.html
+---
+
+A couple of months ago Paolo Bonzini <a href="https://lkml.kernel.org/r/1444822245-6784-1-git-send-email-pbonzini@redhat.com">reported a bug</a> in the early 32-bit EFI code on x86. While the bug looked legitimate, I was initially stumped as to how he was triggering it in the first place, and perhaps more importantly, why no one else had hit this issue before. <br /><br />It <a href="https://lkml.kernel.org/r/20151014210050.GE2782@codeblueprint.co.uk">turns out</a> that the values loaded into the x86 descriptor table registers (IDT, GDTR) are not actually accessed when they registers are written - they're only used when performing other operations, such as handling interrupts in the case of the IDT or modifying the segment registers in the case of LDTR and GDTR. So, if you write a completely bogus value into GDTR it will not affect execution until you receive an interrupt. That does explain why no one hit this issue earlier... interrupts were always disabled during execution with the buggy IDT value <a href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/arch/x86/platform/efi/efi.c?id=23a0d4e8fa6d3a1d7fb819f79bcc0a3739c30ba9">until very recently</a>.  <br /><br />The flow of execution used to go like this, <br /><br />
+{% highlight C %}
+static efi_status_t  __init phys_efi_set_virtual_address_map(...)
+{
+        disable_interrupts();
+        switch_page_tables(new_pgtable);
+        load_gdt(new_gdt_addr); 
+        SetVirtualAddressMap();
+        switch_page_tables(orig_pgtable);
+        enable_interrupts();
+}
+{% endhighlight %}
+
+After commit <a href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/arch/x86/platform/efi/efi.c?id=23a0d4e8fa6d3a1d7fb819f79bcc0a3739c30ba9">23a0d4e8fa</a> the following order of events was possible, 
+<br /><br />
+
+{% highlight C %}
+static efi_status_t  __init phys_efi_set_virtual_address_map(...)
+{
+        
+        switch_page_tables(new_pgtable);
+        load_gdt(new_gdt_addr); 
+        <INTERRUPT> --> crash!
+        disable_interrupts();
+        SetVirtualAddressMap()
+        enable_interrupts();
+        switch_page_tables(orig_pgtable);
+}
+{% endhighlight %}
+
+An important point to note is that it is the loading of the new page tables that renders the GDT address invalid - we weren't actually loading an incorrect address, it's just that the address wasn't mapped in the new page tables. Disabling interrupts throughout the entire execution of phys_efi_set_virtual_address_map() masked this bug for years.

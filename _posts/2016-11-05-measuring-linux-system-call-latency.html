@@ -1,0 +1,133 @@
+---
+layout: post
+title: Measuring Linux system call latency regressions
+date: '2016-11-05T16:03:00.002-07:00'
+tags: 
+modified_time: '2016-11-05T16:08:40.960-07:00'
+thumbnail: https://4.bp.blogspot.com/-g4ZeUL5ZVu8/WB5kahD-BUI/AAAAAAAAFJk/0gCRAP_wlW8av4diumQw44rNXez3u-VHQCLcB/s72-c/syscall.png
+blogger_id: tag:blogger.com,1999:blog-5657688967837431090.post-7239686305436511987
+blogger_orig_url: http://www.codeblueprint.co.uk/2016/11/measuring-linux-system-call-latency.html
+---
+
+<div>Last month I got a report from one of SUSE's QA teams that
+writev(2) performance had regressed between Linux kernel v3.12 and
+v4.4 as reported by the libmicro microbenchmark. libmicro tests a
+number of file-related system calls and the writev_t1k test had
+regressed about 16.12%. On the QA machine, v3.12 was showing a mean
+latency of 3.7usec and v4.4 about 4.2usec.</div><br /><div>What
+follows is an account of the steps I took and thought processes I went
+through when investigating this report. This article is mainly
+intended to be a record that I can review in the future, but other
+people might find it interesting too.<br /><br /></div><div>For me,
+the first step in any performance investigation is reproduction.
+Secondly, validating the scenarios under which the regression occurs
+and whether those conditions are reasonable -- for example, if a
+misconfigured benchmark shows a regression, does anyone really
+care?</div><h2>Reproduction</h2><div>I grabbed the code that the QA
+team use for running libmicro and logged into one of their v4.4
+machines exhibiting the problem. I then re-ran the benchmark with the
+exact parameters from the report,<br /><br />
+
+{% highlight bash %}
+  ./bin/writev -E -C 2000 -L -S -W -N "writev_t1k" -s 1k -v 10 -f /tmp/data
+{% endhighlight %}
+
+I actually ran it multiple times, out of habit. Doing this gives a
+good indication of run-to-run variability and whether the reported
+regression was simply a case of hitting an unlucky run.<br /><br
+/></div><div>Incidentally, the first time I ran the code on v4.4 I got
+the same result as Linux v3.12. Running it a few more times hit the
+regressed numbers in the report, so something non-deterministic was
+clearly going on.</div><h2>Validation</h2><div>Having reproduced the
+issue, the next step was to figure out whether the libmicro results
+were expected/sensible or misleading. Was something misconfigured? Can
+we *trust* the data?<br /><br /></div><div>I chose to verify the
+results libmicro was reporting with another tool. In this case, ftrace
+and the syscall tracepoints.</div><br /><blockquote>Sidebar: Brendan Gregg's
+textbook "Systems Performance: Enterprise and Cloud" has a handy tip
+about cross-validation and using tools to test other tools. Sometimes
+having multiple ways of doing something can be an
+advantage.</blockquote><div>You can use the sys_writev_enter and
+sys_writev_exit tracepoints to individually measure how long the
+writev(2) syscall took like so,<br /><br />
+
+{% highlight bash %}
+  for sys in sys_writev_enter sys_writev_exit; do
+    echo 1 > /sys/kernel/debug/tracing/events/syscalls/${sys}/enable
+  done
+{% endhighlight %}
+
+The output from /sys/kernel/debug/tracing/trace will look similar
+to,<br /><br />
+
+{% highlight bash %}
+writev-23314 [002] ...1 705193.737900: sys_writev(fd: 3, vec: 1e800c0, vlen: a)
+writev-23314 [002] ...1 705193.737904: sys_writev -> 0x2800
+{% endhighlight %}
+
+Then you can use awk or any other glue language to workout duration
+from consecutive timestamps, and then use those durations to calculate
+the mean for yourself.</div><div><br /><blockquote>This is a bug bear of mine - when benchmarks do not dump the samples   they used to calculate averages. Depending on the context, you may   want to manually calculate different statistics, like percentiles or   the median. Using a single mean value also prohibits you from seeing   patterns in the data.</blockquote></div><div>Averages reported by libmicro looked roughly accurate when compared with those in the report, given that libmicro cannot measure the durations as accurately as ftrace.</div><h2>Analysis</h2><div>At this point, it's important to dig a little deeper into any patterns that emerge from the individual durations.</div><div>The first thing I did was sort the times, into non-increasing order, with the highest latency first, for each of the multiple runs I performed.<br /><br /></div><div>Those runs with a higher average (worse latency) had more individual higher latencies, but no astronomically large latencies. Which implies that the cause of the high latency wasn't some singular event - writev calls sometimes just took longer.<br /><br /></div><div>A large latency, or outlier, would skew the mean value and could be the cause of the differences in mean between kernel versions. But that clearly wasn't happening here.<br /><br /></div><div>I looked at the raw traces gathered above and tried to match up high latencies with a timestamp. I noticed that the higher latencies usually occurred at the beginning of the run (7 or 8 microseconds). With the latencies at the end always being around 3 or 4 microseconds.<br /><br /></div><div>At this point, I assumed there were some oddities in the startup of libmicro. 2000 samples were collected by libmicro and so it was natural to print the mean of 500 samples at the following intervals, 0-500, 500-1000, 1000-1500, 1500-2000.<br />
+<br />
+
+{% highlight bash %}
+  for i in 500 1000 1500 2000; do
+        cat /tmp/trace | head -n$i | tail -n500
+  done
+{% endhighlight %}
+
+Doing that for 3 runs shows the trend. The last two samples have a
+mean of 3-4 and the first two chunks vary.<br /><br />
+
+{% highlight bash %}
+writev_t1k reported mean: 6.17776
+ 500: mean 6.018us median 6us
+1000: mean 5.172us median 5us
+1500: mean 5.048us median 5us
+2000: mean 3.918us median 4us
+
+writev_t1k reported mean: 5.64197
+ 500: mean 6.254us median 6us
+1000: mean 5.038us median 6us
+1500: mean 3.526us median 4us
+2000: mean 3.608us median 4us
+
+writev_t1k reported mean: 4.33704
+ 500: mean 3.528us median 3us
+1000: mean 3.486us median 3us
+1500: mean 3.518us median 3us
+2000: mean 3.492us median 3us
+{% endhighlight %}
+
+Had I graphed the latencies straight away, these startup effects would have been obvious from the start. Hypothetically, it would have looked something like this,
+
+<a href="https://4.bp.blogspot.com/-g4ZeUL5ZVu8/WB5kahD-BUI/AAAAAAAAFJk/0gCRAP_wlW8av4diumQw44rNXez3u-VHQCLcB/s1600/syscall.png" imageanchor="1"><img border="0" height="300" src="https://4.bp.blogspot.com/-g4ZeUL5ZVu8/WB5kahD-BUI/AAAAAAAAFJk/0gCRAP_wlW8av4diumQw44rNXez3u-VHQCLcB/s400/syscall.png" width="400" /></a>
+
+</div><div>Looking at the trace again with the function graph tracer didn't show any particular hotspots. Simply, functions took, roughly, 50% less time by the end of the run than at the start including such key kernel functions as raw_spin_lock().
+
+</div><div>It was looking extremely likely that caching effects were the cause of the regression - the functions execute more quickly as the cache warmed.
+
+</div><div>I quickly checked to see whether libmicro was subject to excessive scheduler migrations using,
+<br /><br />
+{% highlight bash %}
+  perf stat -e migrations -- ./libmicro <args>
+{% endhighlight %}
+
+</div>But only saw 4 migrations for the whole test. Note that like most benchmark suites libmicro forks individual tests, and the scheduler will usually try to balance tasks on fork() which can be the cause of migrations for new tasks. 
+<h2>Conclusion</h2><div>I didn't dig any deeper into the scheduler migrations, even if they were likely to be the source of the different libmicro results between v3.12 and v4.4.
+
+</div><div>If the scheduler is moving newly forked tasks to a new CPU in v4.4, and didn't in v3.12, that hardly seemed like a bug. Sure, if I'd seen hundreds or thousands of migrations occurring during the earliest parts of the libmicro test, that would warrant investigation. But it wasn't.
+
+</div><div>Instead, the most pragmatic solution was to suggest that the QA team switch from sample-based to duration-based testing, which can help mitigate any startup effects (such as the CPU caches being cold) - it's unclear whether 2000 samples avoids cache issues, it's much more obvious that running for 10 seconds does.</div><div>
+Switching the libmicro arguments from -C 2000 (samples) to -D 2000
+(duration) showed system call latencies in v4.4 that matched v3.12,
+<br /><br />
+
+{% highlight bash %}
+writev_t1k reported mean: 3.80822
+writev_t1k reported mean: 3.83027
+writev_t1k reported mean: 3.78845
+writev_t1k reported mean: 3.81897
+writev_t1k reported mean: 3.77828
+{% endhighlight %}
+</div>
