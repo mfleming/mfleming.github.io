@@ -188,6 +188,7 @@
 .post-link {
     display: block;
     font-size: 24px;
+    color: $grey-color-dark;
 }
 
 
@@ -259,7 +260,7 @@ $padding-x-small: 3%;
   @extend %padding-regular;
   display: inline-block;
   width: 60%;
-  background-color: #F98752;
+  background-color: #FFFFFFFF;
   background-size: cover;
   font-size: 1.2em;
   text-align: center;
