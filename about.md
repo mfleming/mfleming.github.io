@@ -12,4 +12,4 @@ analysis and pretty much anything to do with open source software.
 If you want to get in touch, please feel free to [drop me an
 email](mailto:{{ site.email }}).
 
-All opinions and comments on these pages are my own.
+All opinions on these pages are my own.
