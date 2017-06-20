@@ -5,6 +5,7 @@ permalink: /writing/
 ---
 
 # Articles <a name="articles"></a> #
+ - [A survey of scheduler benchmarks](https://lwn.net/SubscriberLink/725238/904b69ce929e5758/) LWN, June 2017
  - [Benchmarks Don't Have to Die](https://www.infoq.com/articles/traditional-benchmark-lifespan) InfoQ, May 2017
  - [The bootstrap process on EFI systems](https://lwn.net/Articles/632528/) LWN, Feburary 2015
 
