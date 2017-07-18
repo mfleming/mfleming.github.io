@@ -19,3 +19,6 @@ Links to some of my work are listed below. [Get in touch](mailto:{{ site.email }
 
 # White Papers <a name="whitepapers"></a> #
  - [A Tour Beyond BIOS Memory Practices](https://firmware.intel.com/sites/default/files/resources/A_Tour_Beyond_BIOS_Memory_Practices_with_UEFI.pdf), Intel.com
+
+# Documentation <a name="documentation"></a> #
+ - [SUSE Linux Enterprise Server System Analysis and Tuning Guide](https://www.suse.com/documentation/sles-12/singlehtml/book_sle_tuning/book_sle_tuning.html#cha.tuning.taskscheduler), SUSE.com
