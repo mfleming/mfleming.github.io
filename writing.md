@@ -8,6 +8,7 @@ Links to some of my work are listed below. [Get in touch](mailto:{{ site.email }
 
 
 # Articles <a name="articles"></a> #
+ - [Reconsidering the scheduler's wake_wide() heuristic](https://lwn.net/SubscriberLink/728942/2550809e7d19583d/), LWN.net
  - [A survey of scheduler benchmarks](https://lwn.net/SubscriberLink/725238/904b69ce929e5758/), LWN.net
  - [Benchmarks Don't Have to Die](https://www.infoq.com/articles/traditional-benchmark-lifespan), InfoQ.com
  - [The bootstrap process on EFI systems](https://lwn.net/Articles/632528/), LWN.net
