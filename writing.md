@@ -23,3 +23,4 @@ Links to some of my work are listed below. [Get in touch](mailto:{{ site.email }
 
 # Documentation <a name="documentation"></a> #
  - [SUSE Linux Enterprise Server System Analysis and Tuning Guide](https://www.suse.com/documentation/sles-12/singlehtml/book_sle_tuning/book_sle_tuning.html#cha.tuning.taskscheduler), SUSE.com
+ - [SUSE Linux Enterprise Real Time Extension Virtualization Guide](https://www.suse.com/documentation/slerte-12/book_slert_qs/data/art_slert_virtguide.html), SUSE.com
