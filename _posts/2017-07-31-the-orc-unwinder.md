@@ -4,12 +4,11 @@ layout: post
 comments: true
 ---
 
-
 No one wants their Linux machine to crash. But when it does, providing as much information as possible to the upstream developers helps to ensure it doesn’t happen again. Fixing the bug  requires that developers understand the state of your machine at the time of the crash. One of the most critical clues for debugging is the stacktrace, produced by the kernel’s stack unwinder. But the kernel’s unwinders are not reliable 100% all of the time. The [x86 ORC unwinder patch series](https://marc.info/?l=linux-kernel&m=150093945309763), posted to the Linux kernel mailing list by Josh Poimboeuf, aims to change that.
 
 # The Purpose of Stack Unwinders #
 
-If your Linux machine crashes, kernel developers want to know the execution path that lead to the crash because it helps them to debug and fix the root cause. A stack unwinder’s job is to figure out how a process reached the current machine instruction. This sequence is known as a stacktrace or callgraph. It is a list of functions that were entered (but not exited) on the way to the current instruction.
+If your Linux machine crashes, kernel developers want to know the execution path that led to the crash because it helps them to debug and fix the root cause. A stack unwinder’s job is to figure out how a process reached the current machine instruction. This sequence is known as a stacktrace or callgraph. It is a list of functions that were entered (but not exited) on the way to the current instruction.
 
 When a crash occurs, a callgraph is displayed in the Oops message.
 Here's an example with the callgraph highlighted by a red box.
