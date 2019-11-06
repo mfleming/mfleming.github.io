@@ -32,7 +32,18 @@ it's usually some part of the execution unit.
 SMT threads usually come in pairs for x86 architecture, and those
 threads contend with their siblings for access to shared processor
 hardware. By using SMT you are effectively trying to exploit the natural
-gaps in a thread's hardware use.
+gaps in a thread's hardware use. Or as Pekka Enberg eloquently put it:
+
+<center><blockquote class="twitter-tweet" data-conversation="none"><p
+lang="en" dir="ltr">Simultaneous multithreading (SMT) is all about
+keeping superscalar CPU units busy by converting thread-level
+parallelism (TLP) to instruction-level parallelism (ILP). For
+applications with high TLP and low ILP, SMT makes sense as a performance
+optimization.</p>&mdash; Pekka Enberg (@penberg) <a
+href="https://twitter.com/penberg/status/1191992460416827393?ref_src=twsrc%5Etfw">November
+6, 2019</a></blockquote> <script async
+src="https://platform.twitter.com/widgets.js"
+charset="utf-8"></script></center>
 
 There are both good and bad reasons to use SMT.
 
