@@ -4,9 +4,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}</title>
+  {% if page.meta-description %}
+  <meta name="description" content="{{ page.meta-description }}">
+  {% else %}
   <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
+  {% endif %}
 
+  {% if page.share-img %}
+  <meta property="og:image" content="{{ site.url }}{{ page.share-img }}" />
+  {% else %}
   <meta property="og:image" content="{{ site.url }}/assets/front.jpg" />
+  {% endif %}
 
   <!-- Twitter summary cards -->
   <meta name="twitter:card" content="summary" />
@@ -14,11 +22,15 @@
   <meta name="twitter:creator" content="@fleming_matt" />
 
   <meta name="twitter:title" content="{{ page.title }}" />
+
+  {% if page.share-img %}
+  <meta name="twitter:image" content="{{ site.url }}{{ page.share-img }}" />
+  {% else %}
   <meta name="twitter:image" content="{{ site.url }}/assets/front.jpg" />
+  {% endif %}
 
   <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}">
-  <!-- Font Awesome -->
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 </head>
