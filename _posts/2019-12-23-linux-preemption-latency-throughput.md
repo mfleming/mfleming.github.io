@@ -1,7 +1,7 @@
 ---
 title: "Linux kernel preemption and the latency-throughput tradeoff"
 layout: post
-share-img: "assets/cyclictest.png"
+share-img: "/assets/cyclictest.png"
 meta-description: "The Linux kernel supports multiple preemption models. This post explains how to pick the right one for your workload using example benchmark data."
 comments: true
 ---
