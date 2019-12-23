@@ -25,7 +25,7 @@ ready to run (low latency).
 The Linux kernel supports multiple preemption models so that you can
 tune the preemption behaviour for your workload.
 
-## The three Linux preemption models
+## The three Linux kernel preemption models
 
 Originally there were only two preemption options for the kernel:
 running with preemption on or off. That setting was controlled by the
@@ -44,7 +44,7 @@ setting for pretty much all Linux distributions since [openSUSE
 switched](https://bugzilla.suse.com/show_bug.cgi?id=1125004) at the
 beginning of this year.
 
-Unfortunately, choosing the best preemption model is not
+Unfortunately, choosing the best Linux kernel preemption model is not
 straightforward. Like with most performance topics, the best way to pick
 the right option is to run some tests and use cold hard numbers to make
 your decision.
@@ -54,7 +54,8 @@ your decision.
 To get an idea of how much the three config options lived up to their
 intended goals, I decided to try each of them out by running the
 [cyclictest](http://people.redhat.com/williams/latency-howto/rt-latency-howto.txt)
-and [sockperf](https://github.com/Mellanox/sockperf) benchmarks with a Linux 5.4 kernel.
+and [sockperf](https://github.com/Mellanox/sockperf) benchmarks with a
+Linux 5.4 kernel.
 
 
 If you’re interested in reproducing the tests on your own hardware,
