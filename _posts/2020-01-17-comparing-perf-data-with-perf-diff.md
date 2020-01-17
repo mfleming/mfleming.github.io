@@ -18,17 +18,20 @@ using statistical methods to compare them. I've written before about how humans
 are bad at objectively comparing numbers because they [see patterns in data
 where none exist]({{ site.baseurl }}/2018/11/26/psychology-performance-data.html).
 
-I watched two talks recently that riffed on this theme of "don't compare
-results by hand". [Emery Berger](https://twitter.com/emeryberger) spends a good
-chunk of his talk, ["Performance
-matters"](https://www.youtube.com/watch?v=r-TLSBdHe1A) explaining why it's bad
-idea to use ["eyeball statistics"](https://youtu.be/r-TLSBdHe1A?t=1102)
-(**note** eyeball statistics is not actually a thing) to analyse numbers, and
-Alex Kehlenbeck's talk "[Performance is a shape, not a
-number](https://www.youtube.com/watch?v=EG7Zhd6gLiw&feature=emb_logo)" really
-goes into detail on how you should be using statistical methods to compare
-latencies in your app. Here's my favourite quote from his talk (around the
-[19:21](https://youtu.be/EG7Zhd6gLiw?t=1161) mark):
+I watched two talks recently (thanks for the recommendation
+[Franklin!](https://twitter.com/n0madsky)) that riffed on this theme of
+"don't compare results by hand". [Emery
+Berger](https://twitter.com/emeryberger) spends a good chunk of his
+talk, ["Performance
+matters"](https://www.youtube.com/watch?v=r-TLSBdHe1A) explaining why
+it's bad idea to use ["eyeball
+statistics"](https://youtu.be/r-TLSBdHe1A?t=1102) (**note** eyeball
+statistics is not actually a thing) to analyse numbers, and Alex
+Kehlenbeck's talk "[Performance is a shape, not a
+number](https://www.youtube.com/watch?v=EG7Zhd6gLiw&feature=emb_logo)"
+really goes into detail on how you should be using statistical methods
+to compare latencies in your app. Here's my favourite quote from his
+talk (around the [19:21](https://youtu.be/EG7Zhd6gLiw?t=1161) mark):
 
 > The ops person that's responding to a page at two in the morning really has
 > no idea how to compare these things. You've gotta let a machine do it.
