@@ -47,7 +47,6 @@ doing is using [`perf-diff`](http://man7.org/linux/man-pages/man1/perf-diff.1.ht
 
 Here's a [gist for random-syscall.c](https://gist.github.com/mfleming/c26abc925d5661a7df34737822fb5f0b),
 a small program that runs for some duration in seconds and randomly calls
-
 `nanosleep(2)` or spins in userspace for 3 milliseconds. To generate some
 profile data, I ran it 5 times and recorded a profile with `perf-record` like
 this:
@@ -85,7 +84,8 @@ The output of `$ perf-diff perf.data.[1-5]` looks like this:
   <p style="color: #828282"><i>$ perf diff perf.data.[1-5]</i></p>
 </center>
 
-Much better! As you'd expect, `perf-diff` comes with the usual assortment of
-command-line options including `--comms` (narrow the displayed results to
-specific programs), `--sort` (order the displayed results by a given key), and
-`--symbols` (only display provided symbols).
+Much better! No more eyeball statistics. As you'd expect, `perf-diff`
+comes with the usual assortment of command-line options including
+`--comms` (narrow the displayed results to specific programs), `--sort`
+(order the displayed results by a given key), and `--symbols` (only
+display provided symbols).
