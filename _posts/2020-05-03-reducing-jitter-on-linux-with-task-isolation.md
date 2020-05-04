@@ -96,6 +96,16 @@ cpuset using `cset` -- that enables ftrace, runs the workload for 30
 seconds, and then dumps the kernel trace to a `trace.txt`
 
 {% highlight bash %}
+# Stop irqbalanced and remove CPU from IRQ affinity masks
+systemctl stop irqbalance.service
+for i in /proc/irq/*/smp_affinity; do
+        bits=$(cat $i | sed -e 's/,//')
+        not_bits=$(echo $((((16#$bits) & ~(1<<47)))) | \
+		xargs printf %0.2x'\n' | \
+		sed ':a;s/\B[0-9a-f]\{8\}\>/,&/;ta')
+        echo $not_bits > $i
+done
+
 export tracing_dir="/sys/kernel/debug/tracing"
 
 # Remove -rt task runtime limit
