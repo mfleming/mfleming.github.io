@@ -4,8 +4,8 @@ title: About
 permalink: /about/
 ---
 
-I'm Matt Fleming, a Senior Performance Engineer at
-[SUSE](http://www.suse.com).
+I'm Matt Fleming, a Staff Software Engineer at
+[DataStax](https://www.datastax.com/).
 
 I'm also a [freelance writer]({{ site.baseurl }}/writing/). I've
 written for some of the [biggest names](http://www.intel.com) in the
