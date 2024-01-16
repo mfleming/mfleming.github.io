@@ -7,6 +7,11 @@ permalink: /writing/
 Links to some of my work are listed below. [Get in touch](mailto:{{ site.email }}) if you want to discuss a writing assignment.
 
 
+# Researh papers
+
+ - [Hunter: Using Change Point Detection to Hunt for Performance Regressions](https://arxiv.org/abs/2301.03034)
+ - [Fallout: Distributed Systems Testing as a Service](https://arxiv.org/abs/2110.05543)
+
 # Articles <a name="articles"></a> #
  - [Reconsidering the scheduler's wake_wide() heuristic](https://lwn.net/SubscriberLink/728942/2550809e7d19583d/), LWN.net
  - [A survey of scheduler benchmarks](https://lwn.net/SubscriberLink/725238/904b69ce929e5758/), LWN.net
