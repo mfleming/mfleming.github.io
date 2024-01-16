@@ -17,6 +17,10 @@ Links to some of my work are listed below. [Get in touch](mailto:{{ site.email }
  - [A survey of scheduler benchmarks](https://lwn.net/SubscriberLink/725238/904b69ce929e5758/), LWN.net
  - [Benchmarks Don't Have to Die](https://www.infoq.com/articles/traditional-benchmark-lifespan), InfoQ.com
  - [The bootstrap process on EFI systems](https://lwn.net/Articles/632528/), LWN.net
+ - [A thorough introduction to eBPF](https://lwn.net/Articles/740157/), LWN.net
+ - [An introduction to the BPF Compiler Collection](https://lwn.net/Articles/742082/), LWN.net
+ - [Some advanced BCC topics](https://lwn.net/Articles/747640/), LWN.net
+ - [Using user-space tracepoints with BPF](https://lwn.net/Articles/753601/), LWN.net
 
 # Blogs <a name="blogs"></a> #
  - [First IoT Leeds Meetup](https://iotuk.org.uk/first-iot-leeds-meetup/), IoTUK.org.uk
